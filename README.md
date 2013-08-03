@@ -44,7 +44,7 @@ I hope you have a Mac, because I don't think this script will run on Windows or 
 2. Create or copy the public and private key pair belonging to your Raspberry Pi into the "transfer" folder.
    Call the files `id_rsa` for the private key, and `id_rsa.pub` for the public key.
 3. Make sure your own public key is in `~/.ssh/id_rsa.pub`. Either that, or change the config variable near the top of
-   [makemypi.sh](https://github.com/mholt/makemypi/blob/master/makemypi.sh).
+   [makemypi.sh](https://github.com/mholt/makemypi/blob/master/makemypi.sh). This should be for the key you will log in with.
 4. Verify the "CONFIGURE" sections in both [makemypi.sh](https://github.com/mholt/makemypi/blob/master/makemypi.sh)
    and [transfer/setup.sh](https://github.com/mholt/makemypi/blob/master/transfer/setup.sh) are correct.
    **You will probably need to tweak the configuration.**
