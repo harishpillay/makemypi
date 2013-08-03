@@ -14,8 +14,8 @@
 #	3) Verify the configure section in transfer/setup.sh is correct
 #	4) If you have custom setup steps, use custom_template.sh
 #	5) You must cd into the directory of this file before running it
-#	6) chmod +x install.sh
-#	7) sudo ./install.sh [imgFile]
+#	6) chmod +x makemypi.sh
+#	7) sudo ./makemypi.sh [imgFile]
 # The optional parameter is a path to the .img file to write onto the SD card.
 # If you don't specify one, the script can download and extract the file for you.
 
@@ -64,6 +64,13 @@ RegularHome=$(eval echo ~${SUDO_USER})
 
 if [[ $EUID -ne 0 ]]; then
 	echo "Must be root. Aborting."
+	exit
+fi
+
+if [ ! -e transfer/id_rsa ] || [ ! -e transfer/id_rsa.pub ]; then
+	echo "Missing transfer/id_rsa or transfer/id_rsa.pub files."
+	echo "Please save public/private key belonging to the Pi in those files."
+	echo "Aborting."
 	exit
 fi
 
