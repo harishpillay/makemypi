@@ -1,0 +1,42 @@
+#!/usr/bin/expect -f
+
+# TO BE EXECUTED BY RASPISETUP.SH.
+# USAGE: ./scptransfer.exp [user] [ip] [password]
+
+set timeout 10
+
+set	user		[lindex $argv 0]
+set	ip			[lindex $argv 1]
+set	password	[lindex $argv 2]
+
+spawn bash -c "scp transfer/* $user\@$ip:~"
+
+expect {
+	"continue connecting (yes/no)?" {
+		send -- yes\r
+		exp_continue
+	}
+
+	"?assword:" {
+		send -- $password\r
+		exp_continue
+	}
+
+	eof
+}
+
+spawn ssh "$user\@$ip"
+expect {
+	"continue connecting (yes/no)?" {
+		send -- yes\r
+		exp_continue
+	}
+	"?assword:" {
+		send -- $password\r
+	}
+	-re {[$#] }
+}
+
+send -- "mkdir -p .ssh && mv id_rsa id_rsa.pub .ssh && chmod +x setup.sh && sudo ./setup.sh\n"
+
+interact

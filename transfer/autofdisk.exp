@@ -1,0 +1,53 @@
+#!/usr/bin/expect -f
+
+# TO BE EXECUTED ONLY BY SETUP.SH
+# USAGE: ./autofdisk.exp [device] [startSector]
+
+set timeout 10
+
+set	device		[lindex $argv 0]
+set startsector	[lindex $argv 1]
+
+# These steps are from the instructions at: http://elinux.org/RPi_Resize_Flash_Partitions
+
+spawn fdisk $device
+
+expect "Command *: "
+send -- d\r
+
+expect "Partition number *: "
+send -- 3\r
+
+expect "Command *: "
+send -- d\r
+
+expect "Partition number *: "
+send -- 2\r
+
+expect "Command *: "
+send -- n\r
+
+
+# Alternatively, the default should be "p" (primary), just by sending \r
+expect "Select *: "
+send -- p\r
+
+
+# Alternatively, there should be a default partition which is the right one just by sending \r
+expect "Partition number *: "
+send -- 2\r
+
+
+expect "First sector *: "
+send $startsector\r
+
+
+# Accept default, which fills the space by choosing the last sector
+expect "Last sector, *: "
+send -- \r
+
+
+expect "Command *: "
+send -- w\r
+
+expect eof

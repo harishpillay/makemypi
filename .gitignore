@@ -1,0 +1,6 @@
+.DS_STORE
+_gitignore
+transfer/custom.sh
+transfer/id_rsa
+transfer/id_rsa.pub
+transfer/authorized_key
