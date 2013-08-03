@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # makemypi
-# Automatically makes a Raspberry Pi by downloading an OS, writing it, installing stuff, and configuring it.
 # By Matthew Holt (github.com/mholt/makemypi)
+# I'm not a shell expert: please contribute!
 
 # YOU WILL EXECUTE THIS SCRIPT
 
-# BASIC INSTRUCTIONS (see README for more up-to-date details):
+# BASIC INSTRUCTIONS (see README.md for more details):
 #	0) Make sure your public key is in: ~/.ssh/id_rsa.pub (or change AuthorizedPubKey below)
 #	1) Put an id_rsa and id_rsa.pub in the "transfer" directory which are, respectively,
 #	   the private and public key belonging to the Raspberry Pi
