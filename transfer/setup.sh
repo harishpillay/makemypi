@@ -88,20 +88,20 @@ mkdir -p .ssh
 chmod 700 .ssh
 
 # Load and save the public key into the authorized_keys file so the sysadmin can log in
-AuthorizedPubKey="`cat $PiHome/authorized_key`"
+AuthorizedPubKey="`cat authorized_key`"
 if [ "$AuthorizedPubKey" ]; then
 	echo $AuthorizedPubKey >> .ssh/authorized_keys
 	chmod 600 .ssh/authorized_keys
 fi
-rm -f $PiHome/authorized_key
+rm -f authorized_key
 
 # Save the SSH private and public key pair as id_rsa
 if [ -e id_rsa ]; then
-	mv id_rsa .ssh
+	mv -f id_rsa .ssh
 	chmod 600 .ssh/id_rsa
 fi
 if [ -e id_rsa.pub ]; then
-	mv id_rsa.pub .ssh
+	mv -f id_rsa.pub .ssh
 	chmod 644 .ssh/id_rsa.pub
 fi
 
@@ -156,7 +156,7 @@ echo -ne "\007"
 echo
 echo " ***  ALL DONE!"
 echo " ***  REBOOTING TO FINISH SETUP."
-echo " ***  COME BACK TO VISIT ANYTIME WITH:"
+echo " ***  COME BACK TO VISIT ANY TIME WITH:"
 echo
 echo "      ssh pi@`hostname -I`-p $SSHPort"
 echo
