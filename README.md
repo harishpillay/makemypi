@@ -7,6 +7,8 @@ A script which makes you a Raspberry Pi just the way you want it
 
 ## What it does
 
+**EXAMPLE:** [Watch the recording of my terminal](http://ascii.io/a/4525)
+
 I was tired of doing all these steps manually, so I automated the whole process:
 
 - Downloads a Raspbian Wheezy OS image file if you don't have one already
