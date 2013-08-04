@@ -168,9 +168,9 @@ IpAddress=$IpAddressBegin$IpAddressEnd
 
 # Remove any conflicting host keys from the known_hosts file so there's no "nasty" warnings
 echo "Removing any old entries in known_hosts"
-sed -n '/'"$IpAddress"' /!p' $RootHome/.ssh/known_hosts > $RootHome/.ssh/known_hosts_temp
+sed -n '/'"$IpAddress"'/!p' $RootHome/.ssh/known_hosts > $RootHome/.ssh/known_hosts_temp
 mv -f $RootHome/.ssh/known_hosts_temp $RootHome/.ssh/known_hosts
-sed -n '/'"$IpAddress"' /!p' $RegularHome/.ssh/known_hosts > $RegularHome/.ssh/known_hosts_temp
+sed -n '/'"$IpAddress"'/!p' $RegularHome/.ssh/known_hosts > $RegularHome/.ssh/known_hosts_temp
 mv -f $RegularHome/.ssh/known_hosts_temp $RegularHome/.ssh/known_hosts
 chown $SUDO_USER:staff $RegularHome/.ssh/known_hosts
 
