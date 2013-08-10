@@ -19,20 +19,24 @@ I was tired of doing all these steps manually, so I automated the whole process:
 	- `echoip` (shows raspi's external IP address)
 	- `locip` (shows raspi's local IP address)
 	- `temp` (shows the CPU temperature)
+- Installs:
+   - `htop` (a better process viewer)
+   - `expect` (for automating terminal tasks)
+   - `screen` (terminal window multiplexer)
+   - `usbmount` (optional; automatically mounts/unmounts USB flash drives)
+   - `lynx` (optional; text web browser)
 - Sets the time zone
-- Changes the default password (if you desire)
-- Runs a script file with any custom commands as you please
+- Configures wifi (if you want)
+- Changes the default password (if you want)
+- Runs a one-time provisioning script with any custom commands as you please
 - Resizes the root filesystem to expand to the whole available size of the SD card
-
-I use my custom file to set up a few cron jobs and a simple web server for my own use.
-What do you use yours for?
 
 
 
 ## How it works
 
-It's nearly all automated. Just configure the script, insert an SD card, run the script, insert the SD card into
-your raspi, type something, and the script will finish the setup process for you.
+It's almost all automated. Just configure the script, insert an SD card, run the script, and follow
+the instructions. The terminal will bell when it needs your attention.
 
 
 
@@ -40,18 +44,18 @@ your raspi, type something, and the script will finish the setup process for you
 
 I hope you have a Mac, because I don't think this script will run on Windows or Linux. Oops! (Contribute?)
 
+
 ### Preparation
 
 1. Clone down this repository (or [download the ZIP file](https://github.com/mholt/makemypi/archive/master.zip)).
 2. Create or copy the public and private key pair belonging to your Raspberry Pi into the "transfer" folder.
    Call the files `id_rsa` for the private key, and `id_rsa.pub` for the public key.
-3. Make sure your own public key is in `~/.ssh/id_rsa.pub`. Either that, or change the config variable near the top of
-   [makemypi.sh](https://github.com/mholt/makemypi/blob/master/makemypi.sh). This should be for the key you will log in with.
-4. Verify the "CONFIGURE" sections in both [makemypi.sh](https://github.com/mholt/makemypi/blob/master/makemypi.sh)
-   and [transfer/setup.sh](https://github.com/mholt/makemypi/blob/master/transfer/setup.sh) are correct.
-   **You will probably need to tweak the configuration.**
-5. If you want to do custom setup steps, use
-   [transfer/custom_template.sh](https://github.com/mholt/makemypi/blob/master/transfer/custom_template.sh).
+3. Rename [transfer/config_template.sh](https://github.com/mholt/makemypi/blob/master/transfer/config_template.sh)
+   to `config.sh` and change the settings as needed.
+4. Make sure your own public key is in `~/.ssh/id_rsa.pub`. Either that, or configure the `AuthorizedPubKey` variable
+   with your actual public key string. This will let you log in with your own private key.
+5. You can add your own custom setup steps if you want. Just use
+   [transfer/provision_template.sh](https://github.com/mholt/makemypi/blob/master/transfer/provision_template.sh).
 
 ### Running the script
 
@@ -68,14 +72,12 @@ I hope you have a Mac, because I don't think this script will run on Windows or 
 
 ## More details
 
-Files in the "transfer" folder get copied to the Raspberry Pi during the setup, but aren't guaranteed
-to remain. In fact, all the setup files are removed once the setup is complete.
+Files in the "transfer" folder get copied to the Raspberry Pi during the setup, but all the setup
+files are removed once the setup is complete.
 
-Use [transfer/custom_template.sh](https://github.com/mholt/makemypi/blob/master/transfer/custom_template.sh)
-by renaming it to `custom.sh` and filling out your own custom commands. They'll
-only be run once and won't have access to variables in
-[setup.sh](https://github.com/mholt/makemypi/blob/master/transfer/setup.sh). Your custom commands will be run near
-the end of the setup process, just before expanding the root filesystem to fill the SD card and rebooting.
+Use [transfer/provision_template.sh](https://github.com/mholt/makemypi/blob/master/transfer/provision_template.sh)
+by renaming it to `provision.sh` and writing your own provisioning script. Those commands will only be run once,
+near the end of the setup process, just before expanding the root filesystem to fill the SD card and rebooting.
 (So you'll have more limited space than you might expect.)
 
 Of course, this whole thing is open source, so you can change any part of the script you want. Feel free to fork

@@ -1,62 +1,33 @@
 #!/bin/bash
 
 # makemypi
-# By Matthew Holt (github.com/mholt/makemypi)
-# I'm not a shell expert: please contribute!
-
-# YOU WILL EXECUTE THIS SCRIPT
+# https://github.com/mholt/makemypi
+# by Matthew Holt
 
 # BASIC INSTRUCTIONS (see README.md for more details):
-#	0) Make sure your public key is in: ~/.ssh/id_rsa.pub (or change AuthorizedPubKey below)
-#	1) Put an id_rsa and id_rsa.pub in the "transfer" directory which are, respectively,
-#	   the private and public key belonging to the Raspberry Pi
-#	2) Verify the configure section below is correct
-#	3) Verify the configure section in transfer/setup.sh is correct
-#	4) If you have custom setup steps, use custom_template.sh
-#	5) You must cd into the directory of this file before running it
-#	6) chmod +x makemypi.sh
-#	7) sudo ./makemypi.sh [imgFile]
-# The optional parameter is a path to the .img file to write onto the SD card.
-# If you don't specify one, the script can download and extract the file for you.
-
-
-
-
-###############
-#  CONFIGURE  #
-###############
-
-# Filename of the Raspbian image to download, minus extension
-DownloadFilenameNoExt="2013-07-26-wheezy-raspbian"
-
-# Full URL of the Raspbian image file, using the above filename
-DownloadURL="http://files.velocix.com/c1410/images/raspbian/$DownloadFilenameNoExt/$DownloadFilenameNoExt.zip"
-
-# IMPORTANT! Public key from which to allow login without password (default: contents of ~/.ssh/id_rsa.pub)
-AuthorizedPubKey="`cat $(eval echo ~${SUDO_USER})/.ssh/id_rsa.pub`"
-
-# If downloading a Raspbian image, whether to delete it when done ("y" or "n", or leave empty to be prompted)
-DeleteWhenDone=""
-
-# Instead of downloading an image, you can pass in the path to a local .img file
-ImgFile=$1
-
-# The default username for Raspbian login; usually "pi"
-DefaultUsername="pi"
-
-# The default password for Raspbian login; usually "raspberry"
-DefaultPassword="raspberry"
-
-# The home directory for the root user on the host system. On a Mac, this is usually /var/root
-RootHome="/var/root"
-
-# Usually leave this alone; it's YOUR home directory, of the user that calls sudo
-RegularHome=$(eval echo ~${SUDO_USER})
-
-###################
-#  END CONFIGURE  #
-###################
-
+#	
+#   0) Create transfer/config.sh from transfer/config_template.sh
+#	
+#	1) Make sure your public key is in:
+#		~/.ssh/id_rsa.pub
+#	   or set the AuthorizedPubKey variable in config.sh
+#	
+#	2) Put:
+#		id_rsa
+#		id_rsa.pub
+#	   into the "transfer" directory. These are, respectively, the private and
+#	   public key belonging to the Raspberry Pi
+#	
+#	3) If you have custom setup/provisioning steps, use provision_template.sh
+#	
+#	4) You must cd into the directory of this file before running it
+#	
+#	5) $ chmod +x makemypi.sh
+#	
+#	6) $ sudo ./makemypi.sh [imgFile]
+#	
+#		The optional parameter, imgFile, is a path to the .img file to write onto the SD card.
+#		If you don't specify one, the script can download and extract the file for you.
 
 
 
@@ -69,10 +40,41 @@ fi
 
 if [ ! -e transfer/id_rsa ] || [ ! -e transfer/id_rsa.pub ]; then
 	echo "Missing transfer/id_rsa or transfer/id_rsa.pub files."
-	echo "Please save public/private key belonging to the Pi in those files."
+	echo "Please save private/public key belonging to the Pi in those files."
 	echo "Aborting."
 	exit
 fi
+
+if [ ! -e transfer/config.sh ]; then
+	echo "Missing transfer/config.sh file."
+	echo "Please use transfer/config_template.sh to create transfer/config.sh and try again."
+	echo "Aborting."
+	exit
+fi
+
+
+source transfer/config.sh
+
+
+# Set some defaults, if necessary
+
+if [ -z "$UserHome" ]; then
+	UserHome=$(eval echo ~${SUDO_USER})
+fi
+
+if [ -z "$RootHome" ]; then
+	RootHome="/var/root"
+fi
+
+if [ -z "$DefaultUsername" ]; then
+	DefaultUsername="pi"
+fi
+
+if [ -z "$DefaultPassword" ]; then
+	DefaultPassword="raspberry"
+fi
+
+
 
 
 # Show the user connected storage devices
@@ -91,7 +93,7 @@ do
 	if [ $device == "q" ]; then
 		exit
 	fi
-	echo "You chose /dev/disk$device."
+	echo "You're choosing /dev/disk$device."
 	echo -n "Enter partition (e.g. for /dev/disk""$device""s1, enter s1): "
 	read partition
 	if [ $partition == "q" ]; then
@@ -107,6 +109,7 @@ done
 
 
 # If no image file was specified as an argument, optionally download it and use it
+ImgFile=$1
 if [ -z $ImgFile ]; then
 	echo "No image file specified."
 	echo "I'll download Raspbian Wheezy for you. It's a 518 MB download, and 2.5 GB disk space is needed."
@@ -119,8 +122,7 @@ if [ -z $ImgFile ]; then
 			read DeleteWhenDone
 		fi
 		echo
-		wget $DownloadURL
-		unzip $DownloadFilenameNoExt.zip
+		wget $DownloadURL && unzip $DownloadFilenameNoExt.zip
 		if [ "$DeleteWhenDone" == "y" ]; then
 			rm -f $DownloadFilenameNoExt.zip
 		fi
@@ -154,6 +156,7 @@ if [ $downloaded ] && [ "$DeleteWhenDone" == "y" ]; then
 fi
 
 
+echo 
 echo "Card ejected."
 echo -ne "\007"
 #(say SD card is ready &); (say -v Whisper I own you &)
@@ -161,7 +164,12 @@ echo -ne "\007"
 # Get the LAN IP address of the raspi
 IpAddressBegin="192.168."
 echo "Please use it to boot the Raspberry Pi on the local network before continuing."
-echo -n "When it's ready: what is the local IP address of the Pi? $IpAddressBegin"
+if [ "$WifiSSID" ]; then
+	echo " -->  Please plug in the wifi receiver and ethernet."
+	echo " -->  You MUST plug in at least the network cable for this step"
+	echo "      because wifi won't connect until setup is complete."
+fi
+echo -n "When booted: what is the local IP address of the Pi? $IpAddressBegin"
 read IpAddressEnd
 IpAddress=$IpAddressBegin$IpAddressEnd
 
@@ -170,17 +178,20 @@ IpAddress=$IpAddressBegin$IpAddressEnd
 echo "Removing any old entries in known_hosts"
 sed -n '/'"$IpAddress"'/!p' $RootHome/.ssh/known_hosts > $RootHome/.ssh/known_hosts_temp
 mv -f $RootHome/.ssh/known_hosts_temp $RootHome/.ssh/known_hosts
-sed -n '/'"$IpAddress"'/!p' $RegularHome/.ssh/known_hosts > $RegularHome/.ssh/known_hosts_temp
-mv -f $RegularHome/.ssh/known_hosts_temp $RegularHome/.ssh/known_hosts
-chown $SUDO_USER:staff $RegularHome/.ssh/known_hosts
+sed -n '/'"$IpAddress"'/!p' $UserHome/.ssh/known_hosts > $UserHome/.ssh/known_hosts_temp
+mv -f $UserHome/.ssh/known_hosts_temp $UserHome/.ssh/known_hosts
+chown $SUDO_USER:staff $UserHome/.ssh/known_hosts
 
 # Dump a copy of the public key used for login to a file so it can be transferred
+if [ -z "$AuthorizedPubKey" ]; then
+	AuthorizedPubKey="`cat $UserHome/.ssh/id_rsa.pub`"
+fi
 echo "$AuthorizedPubKey" > transfer/authorized_key
 
 # Perform copy and setup operations on the pi remotely using expect
 echo "Copying setup files and authentication keys to $IpAddress..."
-chmod +x util/scptransfer.exp
-util/scptransfer.exp $DefaultUsername $IpAddress $DefaultPassword
+chmod +x scptransfer.exp
+./scptransfer.exp "$DefaultUsername" "$IpAddress" "$DefaultPassword"
 
 # Once tranferred, copy of the public key is no longer needed
 rm -f transfer/authorized_key
@@ -189,3 +200,9 @@ echo
 echo " ***  YOUR PI IS MADE."
 echo " ***  Just allow a few minutes for it to reboot and resize."
 echo
+
+if [ "$WifiSSID" ]; then
+	echo " ***  The wifi has been configured and should be connecting momentarily,"
+	echo "      probably with a new IP address. You may unplug the ethernet at your leisure."
+	echo
+fi
