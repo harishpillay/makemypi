@@ -91,10 +91,8 @@ if [ -e id_rsa.pub ]; then
 	chmod 644 .ssh/id_rsa.pub
 fi
 
-# Only allow login with private key?
-if [ ! $AllowPasswordLogin ]; then
-	sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
-fi
+# Only allow login with private key, if configured as such
+[[ $AllowPasswordLogin == false ]] && sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/' /etc/ssh/sshd_config
 
 # Change SSH port and restart ssh
 sed -i "s/Port 22/Port $SSHPort/" /etc/ssh/sshd_config
